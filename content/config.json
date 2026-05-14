@@ -1,0 +1,34 @@
+{
+  "title": "Ohmyprogram",
+  "url": "https://ohmyprogram.github.io/works",
+  "description": "Personal notes and essays powered by Notion",
+  "copyright": "© Ohmyprogram All rights reserved.",
+  "googleAnalyticsId": "G-3Y28TK5MZ0",
+  "pathPrefix": "/works",
+  "feedLimit": 4,
+  "menu": [
+    {
+      "title": "Articles",
+      "url": "/"
+    },
+    {
+      "title": "About me",
+      "url": "/pages/about"
+    }
+  ],
+  "author": {
+    "title": "Ohmyprogram",
+    "photo": "/profile.jpg",
+    "description": "Writing, projects, and notes",
+    "contacts": [
+      {
+        "name": "github",
+        "contact": "Ohmyprogram"
+      },
+      {
+        "name": "email",
+        "contact": "hello@example.com"
+      }
+    ]
+  }
+}

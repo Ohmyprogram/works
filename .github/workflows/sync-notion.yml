@@ -1,0 +1,115 @@
+name: Sync Notion and Auto Deploy
+
+on:
+  # 10분마다 실행 (UTC 기준)
+  schedule:
+    - cron: '*/10 * * * *'
+
+  # main 브랜치에 push될 때도 실행
+  push:
+    branches: [ main ]
+
+  # 수동 실행 가능
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+jobs:
+  sync-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        fetch-depth: 0
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Configure Git
+      run: |
+        git config --global user.name 'GitHub Actions Bot'
+        git config --global user.email 'actions@github.com'
+
+    - name: Fetch current Notion data
+      env:
+        NOTION_API_KEY: ${{ secrets.NOTION_API_KEY }}
+        NOTION_DATABASE_ID: ${{ secrets.NOTION_DATABASE_ID }}
+      run: |
+        echo "🔄 Fetching latest Notion data..."
+
+        # 현재 데이터 백업 (비교용)
+        if [ -d "public" ]; then
+          cp -r public public_backup
+        fi
+
+        # Gatsby 빌드 (Notion 데이터 fetch 포함)
+        npm run build
+
+        echo "✅ Notion data fetched and site built"
+
+    - name: Check for changes
+      id: check_changes
+      run: |
+        # public 디렉터리의 변경사항 확인
+        if [ -d "public_backup" ]; then
+          # 백업과 현재 빌드 결과 비교
+          if diff -r public_backup public > /dev/null 2>&1; then
+            echo "📝 No changes detected in Notion content"
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+          else
+            echo "✨ Changes detected in Notion content"
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+
+            # 변경된 파일 목록 출력
+            echo "Changed files:"
+            diff -qr public_backup public | head -20 || true
+          fi
+          rm -rf public_backup
+        else
+          # 첫 빌드인 경우
+          echo "🎉 First build - deploying all content"
+          echo "has_changes=true" >> $GITHUB_OUTPUT
+        fi
+
+    - name: Deploy to GitHub Pages
+      if: steps.check_changes.outputs.has_changes == 'true'
+      uses: JamesIves/github-pages-deploy-action@v4
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        branch: gh-pages
+        folder: public
+        clean: true
+        commit-message: |
+          🔄 Auto-sync from Notion
+
+          Updated at: ${{ github.event.repository.updated_at }}
+          Triggered by: ${{ github.event_name }}
+
+    - name: Create summary
+      run: |
+        echo "## 🤖 Notion Sync Summary" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+
+        if [ "${{ steps.check_changes.outputs.has_changes }}" == "true" ]; then
+          echo "✅ **Status**: Changes detected and deployed" >> $GITHUB_STEP_SUMMARY
+          echo "🌐 **Site**: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}" >> $GITHUB_STEP_SUMMARY
+        else
+          echo "ℹ️ **Status**: No changes detected" >> $GITHUB_STEP_SUMMARY
+          echo "⏰ **Next check**: In 10 minutes" >> $GITHUB_STEP_SUMMARY
+        fi
+
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "📅 **Time**: $(date)" >> $GITHUB_STEP_SUMMARY
+        echo "🔧 **Trigger**: ${{ github.event_name }}" >> $GITHUB_STEP_SUMMARY
