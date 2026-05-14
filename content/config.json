@@ -1,8 +1,8 @@
 {
-  "title": "Ohmyprogram",
+  "title": "YUNA YEO",
   "url": "https://ohmyprogram.github.io/works",
   "description": "Personal notes and essays powered by Notion",
-  "copyright": "© Ohmyprogram All rights reserved.",
+  "copyright": "© YUNA YEO All rights reserved.",
   "googleAnalyticsId": "G-3Y28TK5MZ0",
   "pathPrefix": "/works",
   "feedLimit": 4,
@@ -17,7 +17,7 @@
     }
   ],
   "author": {
-    "title": "Ohmyprogram",
+    "title": "YUNA YEO",
     "photo": "/profile.jpg",
     "description": "Writing, projects, and notes",
     "contacts": [
