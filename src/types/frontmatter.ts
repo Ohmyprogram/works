@@ -3,6 +3,7 @@ interface Frontmatter {
   title: string;
   slug?: string;
   category: string;
+  affiliation?: string;
   template: string;
   description?: string;
   tags?: Array<string>;

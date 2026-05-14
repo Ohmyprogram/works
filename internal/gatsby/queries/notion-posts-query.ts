@@ -5,6 +5,7 @@ interface NotionPostsQueryResult {
     edges?: Array<{
       node: {
         slug: string;
+        affiliation?: string;
         template?: string;
         fields?: {
           slug: string;
@@ -25,6 +26,7 @@ const notionPostsQuery = async (graphql: CreatePagesArgs["graphql"]) => {
         edges {
           node {
             slug
+            affiliation
             template
             fields {
               slug

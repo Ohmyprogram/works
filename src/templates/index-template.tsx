@@ -1,6 +1,6 @@
 import React, { type FC } from "react";
 
-import { graphql } from "gatsby";
+import { graphql, Link } from "gatsby";
 
 import { Feed } from "@/components/feed";
 import { Meta } from "@/components/meta";
@@ -9,7 +9,7 @@ import { Layout } from "@/components/layout";
 import { Sidebar } from "@/components/sidebar";
 import { Pagination } from "@/components/pagination";
 import { useSiteMetadata } from "@/hooks/use-site-metadata";
-import type { AllMarkdownRemark } from "@/types/all-markdown-remark";
+import { affiliations, allAffiliationsPath } from "@/constants/affiliations";
 import type { PageContext } from "@/types/page-context";
 
 interface IndexTemplateProps {
@@ -26,6 +26,7 @@ interface IndexTemplateProps {
           date: string;
           description: string;
           category: string;
+          affiliation?: string;
         };
       }>;
     };
@@ -34,11 +35,21 @@ interface IndexTemplateProps {
 }
 
 const IndexTemplate: FC<IndexTemplateProps> = ({ data, pageContext }) => {
-  const { pagination } = pageContext;
+  const { affiliation, pagination } = pageContext;
+  const { limit = 4, offset = 0 } = pageContext as PageContext & {
+    limit?: number;
+    offset?: number;
+  };
   const { hasNextPage, hasPrevPage, prevPagePath, nextPagePath } = pagination;
+  const filteredEdges = affiliation
+    ? data.allNotionPost.edges.filter(
+        (edge) => edge.node.affiliation === affiliation
+      )
+    : data.allNotionPost.edges;
+  const pagedEdges = filteredEdges.slice(offset, offset + limit);
 
   // Transform NotionPost data to match Feed component format
-  const edges = data.allNotionPost.edges.map(edge => ({
+  const edges = pagedEdges.map(edge => ({
     node: {
       fields: {
         categorySlug: edge.node.fields?.categorySlug || '/category/uncategorized',
@@ -49,6 +60,7 @@ const IndexTemplate: FC<IndexTemplateProps> = ({ data, pageContext }) => {
         date: edge.node.date,
         description: edge.node.description,
         category: edge.node.category,
+        affiliation: edge.node.affiliation,
         slug: edge.node.slug
       }
     }
@@ -58,12 +70,35 @@ const IndexTemplate: FC<IndexTemplateProps> = ({ data, pageContext }) => {
     <Layout>
       <Sidebar isHome />
       <Page>
+        <nav className="affiliationTabs" aria-label="소속 필터">
+          <Link
+            className={!affiliation ? "affiliationTab active" : "affiliationTab"}
+            to={allAffiliationsPath}
+          >
+            전체
+          </Link>
+          {affiliations.map((item) => (
+            <Link
+              className={
+                affiliation === item.label
+                  ? "affiliationTab active"
+                  : "affiliationTab"
+              }
+              key={item.label}
+              to={item.path}
+            >
+              {item.label}
+            </Link>
+          ))}
+        </nav>
         <Feed edges={edges} />
         <Pagination
           prevPagePath={prevPagePath}
           nextPagePath={nextPagePath}
           hasPrevPage={hasPrevPage}
           hasNextPage={hasNextPage}
+          currentPage={pagination.currentPage}
+          totalPages={pagination.totalPages}
         />
       </Page>
     </Layout>
@@ -71,10 +106,8 @@ const IndexTemplate: FC<IndexTemplateProps> = ({ data, pageContext }) => {
 };
 
 export const query = graphql`
-  query IndexTemplate($limit: Int!, $offset: Int!) {
+  query IndexTemplate {
     allNotionPost(
-      limit: $limit
-      skip: $offset
       sort: { date: DESC }
       filter: { template: { eq: "post" }, draft: { ne: true } }
     ) {
@@ -89,6 +122,7 @@ export const query = graphql`
           date
           description
           category
+          affiliation
           template
         }
       }

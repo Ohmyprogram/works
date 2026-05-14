@@ -9,6 +9,7 @@ export const createSchemaCustomization: GatsbyNode["createSchemaCustomization"] 
       slug: String!
       date: Date! @dateformat
       category: String!
+      affiliation: String
       tags: [String!]!
       description: String!
       content: String!

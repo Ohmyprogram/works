@@ -2,3 +2,30 @@
 
 @use "base";
 @use "themes";
+
+.affiliationTabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0 0 28px;
+}
+
+.affiliationTab {
+  border: 1px solid hsl(var(--color-border));
+  color: hsl(var(--color-muted-foreground));
+  display: inline-flex;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
+  padding: 9px 12px;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+
+.affiliationTab:hover,
+.affiliationTab:focus,
+.affiliationTab.active {
+  background: hsl(var(--color-foreground));
+  border-color: hsl(var(--color-foreground));
+  color: hsl(var(--color-background));
+}

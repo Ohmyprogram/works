@@ -33,7 +33,7 @@ interface TagTemplateProps {
 
 const TagTemplate: FC<TagTemplateProps> = ({ data, pageContext }) => {
   const { group, pagination } = pageContext;
-  const { prevPagePath, nextPagePath, hasPrevPage, hasNextPage } = pagination;
+  const { currentPage, totalPages, prevPagePath, nextPagePath, hasPrevPage, hasNextPage } = pagination;
 
   // Transform NotionPost data to match Feed component format
   const edges = data.allNotionPost.edges.map(edge => ({
@@ -62,6 +62,8 @@ const TagTemplate: FC<TagTemplateProps> = ({ data, pageContext }) => {
           nextPagePath={nextPagePath}
           hasPrevPage={hasPrevPage}
           hasNextPage={hasNextPage}
+          currentPage={currentPage}
+          totalPages={totalPages}
         />
       </Page>
     </Layout>

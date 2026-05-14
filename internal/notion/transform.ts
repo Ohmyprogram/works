@@ -97,6 +97,7 @@ export async function transformNotionPage(
     slug,
     date,
     category: getSelect(properties.Category) || "uncategorized",
+    affiliation: getSelect(properties["소속"]) || "",
     tags: getMultiSelect(properties.Tags),
     description: getText(properties.Description) || "",
     draft: getCheckbox(properties.Draft),

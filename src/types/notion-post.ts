@@ -3,6 +3,7 @@ export interface NotionPostFrontmatter {
   slug: string;
   date: string;
   category: string;
+  affiliation: string;
   tags: string[];
   description: string;
   draft: boolean;

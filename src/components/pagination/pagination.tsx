@@ -12,6 +12,8 @@ type Props = {
   nextPagePath: string;
   hasNextPage: boolean;
   hasPrevPage: boolean;
+  currentPage: number;
+  totalPages: number;
 };
 
 const Pagination = ({
@@ -19,6 +21,8 @@ const Pagination = ({
   nextPagePath,
   hasNextPage,
   hasPrevPage,
+  currentPage,
+  totalPages,
 }: Props) => {
   const prevClassName = classNames(styles.previousLink, {
     [styles.disable]: !hasPrevPage,
@@ -38,6 +42,9 @@ const Pagination = ({
         >
           {pagination.prevPage}
         </Link>
+      </div>
+      <div className={styles.current}>
+        {currentPage + 1} / {Math.max(totalPages, 1)}
       </div>
       <div className={styles.next}>
         <Link

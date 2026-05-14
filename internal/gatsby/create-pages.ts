@@ -10,6 +10,7 @@ import { metadataQuery } from "./queries/metadata-query";
 import { categoriesQuery } from "./queries/categories-query";
 import { toKebabCase } from "../../src/utils/to-kebab-case";
 import { concat } from "../../src/utils/concat";
+import { affiliations } from "../../src/constants/affiliations";
 
 type CreateWithPagination = (parameters: {
   limit: number;
@@ -101,6 +102,7 @@ const createPages: GatsbyNode["createPages"] = async ({ graphql, actions }) => {
         offset: page * limit,
         pagination: {
           currentPage: page,
+          totalPages: total,
           prevPagePath: page <= 1 ? path : getPaginationPath(path, page - 1),
           nextPagePath: getPaginationPath(path, page + 1),
           hasNextPage: page !== total - 1,
@@ -152,16 +154,52 @@ const createPages: GatsbyNode["createPages"] = async ({ graphql, actions }) => {
   const template = templates.indexTemplate;
   // Use Notion posts instead of markdown posts for pagination
   const total = Math.ceil((notionPosts?.edges?.length ?? 0) / postsLimit);
+  const pageTotal = Math.max(total, 1);
 
-  for (let page = 0; page < Math.max(total, 1); page += 1) {
+  for (let page = 0; page < pageTotal; page += 1) {
     createWithPagination({
       limit: postsLimit,
       template,
-      total,
+      total: pageTotal,
       page,
       path,
     });
   }
+
+  affiliations.forEach((affiliation) => {
+    const affiliationEdges =
+      notionPosts?.edges?.filter(
+        ({ node }) => node.affiliation === affiliation.label
+      ) ?? [];
+    const affiliationTotal = Math.ceil(affiliationEdges.length / postsLimit);
+    const pageTotal = Math.max(affiliationTotal, 1);
+
+    for (let page = 0; page < pageTotal; page += 1) {
+      createPage({
+        component: template,
+        path:
+          page === 0
+            ? affiliation.path
+            : getPaginationPath(affiliation.path, page),
+        context: {
+          affiliation: affiliation.label,
+          limit: postsLimit,
+          offset: page * postsLimit,
+          pagination: {
+            currentPage: page,
+            totalPages: pageTotal,
+            prevPagePath:
+              page <= 1
+                ? affiliation.path
+                : getPaginationPath(affiliation.path, page - 1),
+            nextPagePath: getPaginationPath(affiliation.path, page + 1),
+            hasNextPage: page !== affiliationTotal - 1 && affiliationTotal > 0,
+            hasPrevPage: page !== 0,
+          },
+        },
+      });
+    }
+  });
 };
 
 export { createPages };

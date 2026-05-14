@@ -2,17 +2,20 @@
 @use "src/assets/styles/variables";
 
 .pagination {
+  align-items: center;
   display: flex;
-  @include mixins.margin-top(2);
+  justify-content: center;
+  @include mixins.margin-top(1);
 
   .previous {
     text-align: left;
-    width: 50%;
+    width: auto;
 
     .previousLink {
       color: hsl(var(--color-foreground));
-      font-size: 26px;
-      font-weight: bold;
+      font-size: variables.$typography-base-font-size * 0.75;
+      font-weight: 600;
+      text-transform: uppercase;
 
       &:hover,
       &:focus {
@@ -26,14 +29,23 @@
     }
   }
 
+  .current {
+    color: hsl(var(--color-muted-foreground));
+    font-size: variables.$typography-base-font-size * 0.75;
+    font-weight: 600;
+    min-width: 64px;
+    text-align: center;
+  }
+
   .next {
     text-align: right;
-    width: 50%;
+    width: auto;
 
     .nextLink {
       color: hsl(var(--color-foreground));
-      font-size: 26px;
-      font-weight: bold;
+      font-size: variables.$typography-base-font-size * 0.75;
+      font-weight: 600;
+      text-transform: uppercase;
 
       &:hover,
       &:focus {
